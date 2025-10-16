@@ -16,8 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * REST endpoints for authentication flows.
- * يوفر نقاط النهاية لتسجيل المستخدمين وتسجيل الدخول والوصول إلى صفحة محمية.
+ * واجهة REST للمصادقة: تسجيل، تسجيل دخول، صفحة محمية، واسترجاع كلمة المرور عبر OTP.
  */
 @RestController
 @RequestMapping("/api/auth")
@@ -28,9 +27,9 @@ public class AuthController {
     private final PasswordResetService passwordResetService;
 
     /**
-     * Register a new user.
-     * @param request signup payload containing username, password, and email
-     * @return message response on success or error message on failure
+     * تسجيل مستخدم جديد.
+     * @param request بيانات التسجيل (username, password, email)
+     * @return رسالة نجاح أو رسالة خطأ
      */
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@RequestBody SignupRequest request) {
@@ -47,9 +46,9 @@ public class AuthController {
     }
 
     /**
-     * Authenticate a user and return a JWT token.
-     * @param request login payload containing username and password
-     * @return {@link AuthResponse} with token and username on success
+     * تسجيل الدخول وإرجاع توكن JWT عند النجاح.
+     * @param request بيانات الدخول (username, password)
+     * @return {@link AuthResponse} يحوي التوكن واسم المستخدم
      */
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody LoginRequest request) {
@@ -69,8 +68,8 @@ public class AuthController {
     }
 
     /**
-     * Example of a protected endpoint to verify JWT protection.
-     * @return simple protected message
+     * مثال لنقطة محمية للتحقق من عمل الحماية بـ JWT.
+     * @return رسالة بسيطة
      */
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile() {
@@ -78,7 +77,8 @@ public class AuthController {
     }
 
     /**
-     * Request OTP to reset password. Accepts email or username in email field.
+     * طلب إرسال OTP إلى البريد لإعادة تعيين كلمة المرور.
+     * يقبل البريد أو اسم المستخدم في حقل email.
      */
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
@@ -89,7 +89,7 @@ public class AuthController {
     }
 
     /**
-     * Verify received OTP and return a short-lived reset token.
+     * التحقق من كود OTP المُرسل، وإرجاع رمز مؤقت (resetToken) لإتمام التغيير.
      */
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtp(@RequestBody VerifyOtpRequest request) {
@@ -102,7 +102,7 @@ public class AuthController {
     }
 
     /**
-     * Reset password using the provided reset token.
+     * إعادة تعيين كلمة المرور باستخدام الرمز المؤقت resetToken.
      */
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {

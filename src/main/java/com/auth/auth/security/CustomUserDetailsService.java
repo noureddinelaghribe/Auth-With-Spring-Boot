@@ -10,7 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 /**
- * Loads {@link UserDetails} from the database by username for Spring Security.
+ * تحميل {@link UserDetails} من قاعدة البيانات بواسطة اسم المستخدم لاستخدامه في Spring Security.
  */
 @Service
 @RequiredArgsConstructor

@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.time.Instant;
 
 /**
- * Stores OTP and reset tokens for password reset flow.
+ * كيان لحفظ بيانات OTP والرمز المؤقت لإعادة تعيين كلمة المرور.
  */
 @Entity
 @Table(name = "password_reset_tokens")

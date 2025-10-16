@@ -12,8 +12,7 @@ import java.security.Key;
 import java.util.Date;
 
 /**
- * Utility for creating and validating JWT tokens.
- * أداة لتوليد وقراءة والتحقق من صلاحية توكنات JWT.
+ * أداة للتعامل مع JWT: توليد التوكن، استخراج البيانات، والتحقق من الصلاحية.
  */
 @Component
 public class JwtUtil {
@@ -31,7 +30,7 @@ public class JwtUtil {
 
 
     /**
-     * Generate a signed JWT for the provided username.
+     * توليد JWT موقّع لاسم المستخدم المرسل.
      */
     public String generateToken(String username) {
         Date now = new Date();
@@ -47,7 +46,7 @@ public class JwtUtil {
 
 
     /**
-     * Extract username (subject) from a token.
+     * استخراج اسم المستخدم (subject) من التوكن.
      */
     public String getUsernameFromToken(String token) {
         Claims claims = Jwts.parser()
@@ -60,7 +59,7 @@ public class JwtUtil {
     }
 
     /**
-     * Validate the token signature and expiry.
+     * التحقق من التوقيع وصلاحية التوكن.
      */
     public boolean validateToken(String token) {
         try {

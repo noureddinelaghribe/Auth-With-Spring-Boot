@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Admin-only management endpoints: list users, change roles, reset passwords.
+ * نقاط إدارة خاصة بالمشرف (ADMIN) فقط: عرض المستخدمين، تغيير الأدوار، إعادة ضبط كلمات المرور.
  */
 @RestController
 @RequestMapping("/api/admin")
@@ -28,13 +28,17 @@ public class AdminController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * إرجاع اسم المستخدم الحالي من الـ SecurityContext (مستخرج من JWT).
+     */
     private String getCurrentUsername() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication.getName();
     }
 
     /**
-     * List all users (ADMIN only).
+     * عرض قائمة كل المستخدمين (ADMIN فقط).
+     * @return قائمة مبسطة للمستخدمين {@link UserResponse}
      */
     @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
@@ -45,7 +49,9 @@ public class AdminController {
     }
 
     /**
-     * Change a user's role to USER or ADMIN (ADMIN only).
+     * تغيير دور مستخدم إلى USER أو ADMIN (ADMIN فقط).
+     * @param id معرف المستخدم
+     * @param body يحتوي المفتاح role بقيمة USER أو ADMIN
      */
     @PostMapping("/users/{id}/role")
     @PreAuthorize("hasRole('ADMIN')")
@@ -61,7 +67,9 @@ public class AdminController {
     }
 
     /**
-     * Reset a user's password to a provided newPassword (ADMIN only).
+     * إعادة ضبط كلمة مرور مستخدم إلى قيمة جديدة (ADMIN فقط).
+     * @param id معرف المستخدم
+     * @param body يحتوي المفتاح newPassword بكلمة المرور الجديدة
      */
     @PostMapping("/users/{id}/reset-password")
     @PreAuthorize("hasRole('ADMIN')")

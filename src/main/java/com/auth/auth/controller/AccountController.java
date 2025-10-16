@@ -13,8 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * Account management endpoints for fetching and updating user profiles.
- * يتضمن نقاط الحصول على المستخدم الحالي، إدارة المستخدمين، والتحديث والحذف.
+ * نقاط إدارة الحساب: جلب الملف الشخصي للمستخدم الحالي، عرض/تحديث/حذف مستخدمين.
  */
 @RestController
 @RequestMapping("/api/account")
@@ -23,15 +22,17 @@ public class AccountController {
 
     private final AccountService accountService;
 
-    // Get current authenticated user's username from JWT
+    /**
+     * الحصول على اسم المستخدم الحالي من الـ JWT عبر SecurityContext.
+     */
     private String getCurrentUsername() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication.getName();
     }
 
     /**
-     * Get the current authenticated user's profile.
-     * @return the current user as {@link UserResponse}
+     * جلب ملف المستخدم الحالي.
+     * @return {@link UserResponse} للمستخدم الحالي
      */
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getCurrentUser() {
@@ -45,9 +46,9 @@ public class AccountController {
     }
 
     /**
-     * Get a user by id. Only allowed for the same user or admins.
-     * @param id user id
-     * @return {@link UserResponse} for the requested user
+     * جلب مستخدم عبر المعرف. مسموح لصاحب الحساب نفسه أو للمشرف ADMIN.
+     * @param id معرف المستخدم
+     * @return {@link UserResponse} للمستخدم المطلوب
      */
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
@@ -61,8 +62,8 @@ public class AccountController {
     }
 
     /**
-     * Get all users. Admin-only operation.
-     * @return list of users
+     * جلب كل المستخدمين. (ADMIN فقط)
+     * @return قائمة المستخدمين
      */
     @GetMapping("/all")
     public ResponseEntity<?> getAllUsers() {
@@ -76,10 +77,10 @@ public class AccountController {
     }
 
     /**
-     * Update a user profile. Allowed for the same user or admins.
-     * @param id user id
-     * @param request update request body
-     * @return updated user response
+     * تحديث ملف مستخدم. مسموح لصاحب الحساب نفسه أو للمشرف ADMIN.
+     * @param id معرف المستخدم
+     * @param request جسم الطلب للتحديث
+     * @return {@link UserResponse} بعد التحديث
      */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(
@@ -95,9 +96,9 @@ public class AccountController {
     }
 
     /**
-     * Delete a user account. Allowed for the same user or admins.
-     * @param id user id
-     * @return message response on success
+     * حذف حساب مستخدم. مسموح لصاحب الحساب نفسه أو للمشرف ADMIN.
+     * @param id معرف المستخدم
+     * @return رسالة نجاح
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {

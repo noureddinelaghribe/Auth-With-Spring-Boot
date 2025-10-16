@@ -10,8 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
- * Authentication service encapsulating registration and login logic.
- * خدمة المصادقة: تسجيل مستخدمين جدد وتسجيل الدخول وتوليد JWT.
+ * خدمة المصادقة: تسجيل مستخدمين جدد، التحقق من بيانات الدخول، وتوليد JWT.
  */
 @Service
 @RequiredArgsConstructor
@@ -22,8 +21,8 @@ public class AuthService {
     private final JwtUtil jwtUtil;
 
     /**
-     * Register a new user with unique username and email.
-     * @return success message
+     * تسجيل مستخدم جديد بعد التحقق من عدم تكرار الاسم والبريد.
+     * @return رسالة نجاح
      */
     public String registerUser(String username, String password, String email) {
 
@@ -49,7 +48,7 @@ public class AuthService {
     }
 
     /**
-     * Authenticate user credentials and return a signed JWT token.
+     * التحقق من بيانات الدخول وإرجاع JWT موقّع عند النجاح.
      */
     public String loginUser(String username, String password) {
 

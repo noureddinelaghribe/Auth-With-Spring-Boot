@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 /**
- * Repository for CRUD and lookup operations on {@link User}.
+ * مستودع البيانات لمستخدم {@link User}: عمليات CRUD وبحوث حسب الاسم والبريد.
  */
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {

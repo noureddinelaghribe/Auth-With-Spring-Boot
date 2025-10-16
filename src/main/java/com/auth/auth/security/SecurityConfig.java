@@ -16,7 +16,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.auth.auth.dto.ErrorResponse;
 
+/**
+ * ضبط الأمان: جلسات عديمة الحالة بـ JWT، تفعيل CORS، ومعالجات JSON لأخطاء 401/403.
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -30,6 +37,10 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authenticationEntryPoint())
+                        .accessDeniedHandler(accessDeniedHandler())
+                )
                 .authorizeHttpRequests(auth -> auth
                         // السماح بالوصول لـ Swagger بدون توكن
                         .requestMatchers(
@@ -75,5 +86,25 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return (request, response, authException) -> {
+            response.setStatus(401);
+            response.setContentType("application/json;charset=UTF-8");
+            ErrorResponse err = new ErrorResponse("unauthorized", authException.getMessage());
+            response.getWriter().write(new ObjectMapper().writeValueAsString(err));
+        };
+    }
+
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        return (request, response, accessDeniedException) -> {
+            response.setStatus(403);
+            response.setContentType("application/json;charset=UTF-8");
+            ErrorResponse err = new ErrorResponse("forbidden", accessDeniedException.getMessage());
+            response.getWriter().write(new ObjectMapper().writeValueAsString(err));
+        };
     }
 }

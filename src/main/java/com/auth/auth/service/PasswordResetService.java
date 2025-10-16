@@ -15,6 +15,12 @@ import java.util.Base64;
 import java.util.Random;
 import java.util.UUID;
 
+/**
+ * خدمة استرجاع كلمة المرور عبر OTP:
+ * - طلب إرسال OTP للبريد
+ * - التحقق من OTP وإصدار رمز مؤقت
+ * - إعادة تعيين كلمة المرور باستخدام الرمز المؤقت
+ */
 @Service
 @RequiredArgsConstructor
 public class PasswordResetService {
@@ -28,6 +34,9 @@ public class PasswordResetService {
     private static final Duration RESET_TOKEN_TTL = Duration.ofMinutes(15);
     private static final int MAX_ATTEMPTS = 5;
 
+    /**
+     * طلب توليد وإرسال OTP إلى بريد المستخدم (أو اسم المستخدم).
+     */
     public void requestOtp(String email) {
         userRepository.findByUsername(email); // no-op just to use repository
         User user = userRepository.findByUsername(email).orElseGet(() -> userRepository.findByEmail(email).orElse(null));
@@ -50,6 +59,9 @@ public class PasswordResetService {
         emailService.sendOtpEmail(user.getEmail(), otp);
     }
 
+    /**
+     * التحقق من OTP المُرسل وإصدار resetToken قصير العمر عند النجاح.
+     */
     public String verifyOtp(String email, String otp) {
         User user = userRepository.findByUsername(email).orElseGet(() -> userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found")));
         PasswordResetToken token = tokenRepository.findByUser(user).orElseThrow(() -> new RuntimeException("OTP not requested"));
@@ -79,6 +91,9 @@ public class PasswordResetService {
         return resetToken;
     }
 
+    /**
+     * إعادة تعيين كلمة المرور باستخدام resetToken.
+     */
     public void resetPassword(String resetToken, String newPassword) {
         PasswordResetToken token = tokenRepository.findByResetToken(resetToken).orElseThrow(() -> new RuntimeException("Invalid token"));
         if (token.getResetTokenExpiresAt() == null || Instant.now().isAfter(token.getResetTokenExpiresAt())) {

@@ -17,8 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 /**
- * JWT authentication filter to extract, validate, and set authentication from tokens.
- * فلتر يتحقق من Header ويبني المصادقة في {@link SecurityContextHolder} عند صحة التوكن.
+ * فلتر JWT: استخراج التوكن من الهيدر، التحقق منه، وبناء المصادقة في {@link SecurityContextHolder}.
  */
 @Component
 @RequiredArgsConstructor
@@ -44,7 +43,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             try {
                 username = jwtUtil.getUsernameFromToken(token);
             } catch (Exception e) {
-                System.out.println("خطأ في Token: " + e.getMessage());
+                // Token parsing failed (e.g., expired/invalid) → return 401
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"error\":\"invalid_or_expired_token\"}");
+                return;
             }
         }
 
@@ -62,6 +65,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+            } else {
+                // Invalid signature/expired token
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"error\":\"invalid_or_expired_token\"}");
+                return;
             }
         }
 

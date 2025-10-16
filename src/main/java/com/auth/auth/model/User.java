@@ -7,8 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 /**
- * JPA entity representing application users.
- * الكيان المسؤول عن تخزين بيانات المستخدم الأساسية.
+ * كيان JPA يمثل مستخدمي التطبيق ويحفظ البيانات الأساسية.
  */
 @Entity
 @Table(name = "users")

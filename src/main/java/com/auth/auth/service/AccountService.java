@@ -12,8 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Business logic for reading/updating user accounts with simple role checks.
- * منطق إدارة الحسابات: عرض، تحديث، حذف مع التحقق من الصلاحيات.
+ * منطق إدارة الحسابات: عرض ملف المستخدم، عرض مستخدم/كل المستخدمين، تحديث، حذف مع فحص الأدوار.
  */
 @Service
 @RequiredArgsConstructor
@@ -23,7 +22,7 @@ public class AccountService {
     private final PasswordEncoder passwordEncoder;
 
     /**
-     * Get the profile of the current authenticated user.
+     * جلب ملف المستخدم الحالي.
      */
     public UserResponse getCurrentUser(String username) {
         User user = userRepository.findByUsername(username)
@@ -32,7 +31,7 @@ public class AccountService {
     }
 
     /**
-     * Get user by id. Allowed for self or ADMIN.
+     * جلب مستخدم بالمعرف. مسموح لصاحب الحساب نفسه أو ADMIN.
      */
     public UserResponse getUserById(Long id, String currentUsername) {
         User user = userRepository.findById(id)
@@ -50,7 +49,7 @@ public class AccountService {
     }
 
     /**
-     * List all users. Only ADMIN can perform this action.
+     * جلب كل المستخدمين. متاح لـ ADMIN فقط.
      */
     public List<UserResponse> getAllUsers(String currentUsername) {
         User currentUser = userRepository.findByUsername(currentUsername)
@@ -66,7 +65,7 @@ public class AccountService {
     }
 
     /**
-     * Update user fields. Allowed for self or ADMIN.
+     * تحديث حقول مستخدم. مسموح لصاحب الحساب نفسه أو ADMIN.
      */
     public UserResponse updateUser(Long id, UpdateUserRequest request, String currentUsername) {
         User user = userRepository.findById(id)
@@ -106,7 +105,7 @@ public class AccountService {
     }
 
     /**
-     * Delete a user account. Allowed for self or ADMIN.
+     * حذف حساب مستخدم. مسموح لصاحب الحساب نفسه أو ADMIN.
      */
     public void deleteUser(Long id, String currentUsername) {
         User user = userRepository.findById(id)
