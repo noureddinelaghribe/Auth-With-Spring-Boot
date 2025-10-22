@@ -1,7 +1,5 @@
 package com.auth.auth.controller;
 
-
-
 import com.auth.auth.dto.AuthResponse;
 import com.auth.auth.dto.LoginRequest;
 import com.auth.auth.dto.MessageResponse;
@@ -54,12 +52,12 @@ public class AuthController {
     public ResponseEntity<?> loginUser(@RequestBody LoginRequest request) {
         try {
             String token = authService.loginUser(
-                    request.getUsername(),
+                    request.getEmail(),
                     request.getPassword()
             );
             return ResponseEntity.ok(new AuthResponse(
                     token,
-                    request.getUsername(),
+                    request.getEmail(),
                     "تم تسجيل الدخول بنجاح!"
             ));
         } catch (Exception e) {

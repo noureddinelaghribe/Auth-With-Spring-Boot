@@ -24,8 +24,8 @@ public class AccountService {
     /**
      * جلب ملف المستخدم الحالي.
      */
-    public UserResponse getCurrentUser(String username) {
-        User user = userRepository.findByUsername(username)
+    public UserResponse getCurrentUser(String email) {
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return mapToUserResponse(user);
     }
@@ -33,12 +33,12 @@ public class AccountService {
     /**
      * جلب مستخدم بالمعرف. مسموح لصاحب الحساب نفسه أو ADMIN.
      */
-    public UserResponse getUserById(Long id, String currentUsername) {
+    public UserResponse getUserById(Long id, String currentEmail) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         
         // Check if user is accessing their own account
-        User currentUser = userRepository.findByUsername(currentUsername)
+        User currentUser = userRepository.findByEmail(currentEmail)
                 .orElseThrow(() -> new RuntimeException("Current user not found"));
         
         if (!user.getId().equals(currentUser.getId()) && !"ADMIN".equals(currentUser.getRole())) {
@@ -51,8 +51,8 @@ public class AccountService {
     /**
      * جلب كل المستخدمين. متاح لـ ADMIN فقط.
      */
-    public List<UserResponse> getAllUsers(String currentUsername) {
-        User currentUser = userRepository.findByUsername(currentUsername)
+    public List<UserResponse> getAllUsers(String currentEmail) {
+        User currentUser = userRepository.findByEmail(currentEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         
         if (!"ADMIN".equals(currentUser.getRole())) {
@@ -67,12 +67,12 @@ public class AccountService {
     /**
      * تحديث حقول مستخدم. مسموح لصاحب الحساب نفسه أو ADMIN.
      */
-    public UserResponse updateUser(Long id, UpdateUserRequest request, String currentUsername) {
+    public UserResponse updateUser(Long id, UpdateUserRequest request, String currentEmail) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         
         // Check if user is updating their own account
-        User currentUser = userRepository.findByUsername(currentUsername)
+        User currentUser = userRepository.findByEmail(currentEmail)
                 .orElseThrow(() -> new RuntimeException("Current user not found"));
         
         if (!user.getId().equals(currentUser.getId()) && !"ADMIN".equals(currentUser.getRole())) {
@@ -107,12 +107,12 @@ public class AccountService {
     /**
      * حذف حساب مستخدم. مسموح لصاحب الحساب نفسه أو ADMIN.
      */
-    public void deleteUser(Long id, String currentUsername) {
+    public void deleteUser(Long id, String currentEmail) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         
         // Check if user is deleting their own account
-        User currentUser = userRepository.findByUsername(currentUsername)
+        User currentUser = userRepository.findByEmail(currentEmail)
                 .orElseThrow(() -> new RuntimeException("Current user not found"));
         
         if (!user.getId().equals(currentUser.getId()) && !"ADMIN".equals(currentUser.getRole())) {

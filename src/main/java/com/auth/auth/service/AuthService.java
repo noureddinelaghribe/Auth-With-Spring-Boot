@@ -1,7 +1,5 @@
 package com.auth.auth.service;
 
-
-
 import com.auth.auth.model.User;
 import com.auth.auth.repository.UserRepository;
 import com.auth.auth.util.JwtUtil;
@@ -50,18 +48,18 @@ public class AuthService {
     /**
      * التحقق من بيانات الدخول وإرجاع JWT موقّع عند النجاح.
      */
-    public String loginUser(String username, String password) {
+    public String loginUser(String email, String password) {
 
-        // البحث عن المستخدم
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("اسم المستخدم أو كلمة المرور خاطئة!"));
+        // البحث عن المستخدم بالبريد الإلكتروني
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("البريد الإلكتروني أو كلمة المرور خاطئة!"));
 
         // التحقق من كلمة المرور
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("اسم المستخدم أو كلمة المرور خاطئة!");
+            throw new RuntimeException("البريد الإلكتروني أو كلمة المرور خاطئة!");
         }
 
-        // توليد JWT Token
-        return jwtUtil.generateToken(username);
+        // توليد JWT Token مع البريد كموضوع
+        return jwtUtil.generateToken(email);
     }
 }
