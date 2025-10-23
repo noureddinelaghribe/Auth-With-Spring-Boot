@@ -1,5 +1,7 @@
 package com.auth.auth.service;
 
+import com.auth.auth.dto.ApiResponse;
+import com.auth.auth.dto.LoginResponse;
 import com.auth.auth.model.User;
 import com.auth.auth.repository.UserRepository;
 import com.auth.auth.util.JwtUtil;
@@ -22,15 +24,15 @@ public class AuthService {
      * تسجيل مستخدم جديد بعد التحقق من عدم تكرار الاسم والبريد.
      * @return رسالة نجاح
      */
-    public String registerUser(String username, String password, String email) {
+    public ApiResponse registerUser(String username, String password, String email) {
 
         // التحقق من وجود المستخدم
-        if (userRepository.existsByUsername(username)) {
-            throw new RuntimeException("اسم المستخدم موجود بالفعل!");
-        }
+//        if (userRepository.existsByUsername(username)) {
+//            return new ApiResponse(false, "Username already exists.");
+//        }
 
         if (userRepository.existsByEmail(email)) {
-            throw new RuntimeException("البريد الإلكتروني مستخدم بالفعل!");
+            return new ApiResponse(false, "Email already exists. Please log in instead.");
         }
 
         // إنشاء مستخدم جديد
@@ -42,24 +44,27 @@ public class AuthService {
 
         userRepository.save(user);
 
-        return "تم التسجيل بنجاح!";
+        return new ApiResponse(true, "Account created successfully.");
     }
 
     /**
-     * التحقق من بيانات الدخول وإرجاع JWT موقّع عند النجاح.
+     * التحقق من بيانات الدخول وإرجاع استجابة منظمة مع JWT عند النجاح.
      */
-    public String loginUser(String email, String password) {
+    public LoginResponse loginUser(String email, String password) {
 
         // البحث عن المستخدم بالبريد الإلكتروني
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("البريد الإلكتروني أو كلمة المرور خاطئة!"));
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            return new LoginResponse(false, "Invalid email or password.", null);
+        }
 
         // التحقق من كلمة المرور
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("البريد الإلكتروني أو كلمة المرور خاطئة!");
+            return new LoginResponse(false, "Invalid email or password.", null);
         }
 
         // توليد JWT Token مع البريد كموضوع
-        return jwtUtil.generateToken(email);
+        String token = jwtUtil.generateToken(email);
+        return new LoginResponse(true, "Login successful.", token);
     }
 }

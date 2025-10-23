@@ -1,12 +1,14 @@
 package com.auth.auth.controller;
 
-import com.auth.auth.dto.AuthResponse;
+import com.auth.auth.dto.ApiResponse;
+import com.auth.auth.dto.LoginResponse;
 import com.auth.auth.dto.LoginRequest;
 import com.auth.auth.dto.MessageResponse;
 import com.auth.auth.dto.SignupRequest;
 import com.auth.auth.dto.ForgotPasswordRequest;
 import com.auth.auth.dto.VerifyOtpRequest;
 import com.auth.auth.dto.ResetPasswordRequest;
+import com.auth.auth.dto.OtpVerifyResponse;
 import com.auth.auth.service.AuthService;
 import com.auth.auth.service.PasswordResetService;
 import lombok.RequiredArgsConstructor;
@@ -31,16 +33,15 @@ public class AuthController {
      */
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@RequestBody SignupRequest request) {
-        try {
-            String message = authService.registerUser(
-                    request.getUsername(),
-                    request.getPassword(),
-                    request.getEmail()
-            );
-            return ResponseEntity.ok(new MessageResponse(message));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        ApiResponse response = authService.registerUser(
+                request.getUsername(),
+                request.getPassword(),
+                request.getEmail()
+        );
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
         }
+        return ResponseEntity.badRequest().body(response);
     }
 
     /**
@@ -50,19 +51,14 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody LoginRequest request) {
-        try {
-            String token = authService.loginUser(
-                    request.getEmail(),
-                    request.getPassword()
-            );
-            return ResponseEntity.ok(new AuthResponse(
-                    token,
-                    request.getEmail(),
-                    "تم تسجيل الدخول بنجاح!"
-            ));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        LoginResponse response = authService.loginUser(
+                request.getEmail(),
+                request.getPassword()
+        );
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
         }
+        return ResponseEntity.badRequest().body(new ApiResponse(false, response.getMessage()));
     }
 
     /**
@@ -91,12 +87,11 @@ public class AuthController {
      */
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtp(@RequestBody VerifyOtpRequest request) {
-        try {
-            String resetToken = passwordResetService.verifyOtp(request.getEmail(), request.getOtp());
-            return ResponseEntity.ok(new MessageResponse(resetToken));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        OtpVerifyResponse response = passwordResetService.verifyOtp(request.getEmail(), request.getOtp());
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
         }
+        return ResponseEntity.badRequest().body(response);
     }
 
     /**
@@ -104,11 +99,10 @@ public class AuthController {
      */
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
-        try {
-            passwordResetService.resetPassword(request.getResetToken(), request.getNewPassword());
-            return ResponseEntity.ok(new MessageResponse("Password reset successfully"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        ApiResponse response = passwordResetService.resetPassword(request.getResetToken(), request.getNewPassword());
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
         }
+        return ResponseEntity.badRequest().body(response);
     }
 }

@@ -4,6 +4,8 @@ import com.auth.auth.model.PasswordResetToken;
 import com.auth.auth.model.User;
 import com.auth.auth.repository.PasswordResetTokenRepository;
 import com.auth.auth.repository.UserRepository;
+import com.auth.auth.dto.OtpVerifyResponse;
+import com.auth.auth.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -11,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Base64;
 import java.util.Random;
 import java.util.UUID;
 
@@ -62,16 +63,22 @@ public class PasswordResetService {
     /**
      * التحقق من OTP المُرسل وإصدار resetToken قصير العمر عند النجاح.
      */
-    public String verifyOtp(String email, String otp) {
-        User user = userRepository.findByUsername(email).orElseGet(() -> userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found")));
-        PasswordResetToken token = tokenRepository.findByUser(user).orElseThrow(() -> new RuntimeException("OTP not requested"));
+    public OtpVerifyResponse verifyOtp(String email, String otp) {
+        User user = userRepository.findByUsername(email).orElseGet(() -> userRepository.findByEmail(email).orElse(null));
+        if (user == null) {
+            return new OtpVerifyResponse(false, "Invalid or expired OTP.", null);
+        }
+        PasswordResetToken token = tokenRepository.findByUser(user).orElse(null);
+        if (token == null) {
+            return new OtpVerifyResponse(false, "Invalid or expired OTP.", null);
+        }
 
         Instant now = Instant.now();
         if (token.getLockedUntil() != null && now.isBefore(token.getLockedUntil())) {
-            throw new RuntimeException("Too many attempts. Try later");
+            return new OtpVerifyResponse(false, "Invalid or expired OTP.", null);
         }
         if (token.getOtpExpiresAt() == null || now.isAfter(token.getOtpExpiresAt())) {
-            throw new RuntimeException("OTP expired");
+            return new OtpVerifyResponse(false, "Invalid or expired OTP.", null);
         }
         if (!passwordEncoder.matches(otp, token.getOtpHash())) {
             int attempts = token.getAttempts() + 1;
@@ -80,7 +87,7 @@ public class PasswordResetService {
                 token.setLockedUntil(now.plus(Duration.ofMinutes(15)));
             }
             tokenRepository.save(token);
-            throw new RuntimeException("Invalid OTP");
+            return new OtpVerifyResponse(false, "Invalid or expired OTP.", null);
         }
 
         // success -> issue reset token
@@ -88,16 +95,16 @@ public class PasswordResetService {
         token.setResetToken(resetToken);
         token.setResetTokenExpiresAt(now.plus(RESET_TOKEN_TTL));
         tokenRepository.save(token);
-        return resetToken;
+        return new OtpVerifyResponse(true, "OTP verified successfully.", resetToken);
     }
 
     /**
      * إعادة تعيين كلمة المرور باستخدام resetToken.
      */
-    public void resetPassword(String resetToken, String newPassword) {
-        PasswordResetToken token = tokenRepository.findByResetToken(resetToken).orElseThrow(() -> new RuntimeException("Invalid token"));
-        if (token.getResetTokenExpiresAt() == null || Instant.now().isAfter(token.getResetTokenExpiresAt())) {
-            throw new RuntimeException("Token expired");
+    public ApiResponse resetPassword(String resetToken, String newPassword) {
+        PasswordResetToken token = tokenRepository.findByResetToken(resetToken).orElse(null);
+        if (token == null || token.getResetTokenExpiresAt() == null || Instant.now().isAfter(token.getResetTokenExpiresAt())) {
+            return new ApiResponse(false, "Reset token is invalid or has expired.");
         }
         User user = token.getUser();
         user.setPassword(passwordEncoder.encode(newPassword));
@@ -106,6 +113,7 @@ public class PasswordResetService {
         token.setResetToken(null);
         token.setResetTokenExpiresAt(null);
         tokenRepository.save(token);
+        return new ApiResponse(true, "Password has been reset successfully.");
     }
 
     private String generateNumericOtp(int length) {
